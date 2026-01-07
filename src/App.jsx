@@ -13,7 +13,8 @@ function App() {
     return saved ? JSON.parse(saved) : null;
   });
 
-  const API_KEY = import.meta.env.VITE_API_KEY;
+  const API_URL =
+    "https://j61vsolaw4.execute-api.us-east-1.amazonaws.com/weather";
   const [currentCity, setCurrentCity] = useState("");
   const [forecastData, setForecastData] = useState([]);
 
@@ -29,9 +30,10 @@ function App() {
     setError(null);
 
     try {
-      const response = await fetch(
-        `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`
-      );
+      // const response = await fetch(
+      //   `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`
+      // );
+      const response = await fetch(`${API_URL}?lat=${lat}&lon=${lon}`);
       if (!response.ok)
         throw new Error(`HTTP error! status: ${response.status}`);
       const data = await response.json();
@@ -40,8 +42,11 @@ function App() {
       updateSearchHistory(data.name);
 
       // Fetch Forecast
+      // const forecastResponse = await fetch(
+      //   `https://api.openweathermap.org/data/2.5/forecast?q=${data.name}&appid=${API_KEY}&units=metric`
+      // );
       const forecastResponse = await fetch(
-        `https://api.openweathermap.org/data/2.5/forecast?q=${data.name}&appid=${API_KEY}&units=metric`
+        `${API_URL}/forecast?city=${encodeURIComponent(data.name)}`
       );
       if (!forecastResponse.ok) throw new Error("Forecast fetch failed");
       const forecastJSON = await forecastResponse.json();
@@ -60,9 +65,13 @@ function App() {
     setError(null);
 
     try {
+      // const response = await fetch(
+      //   `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric`
+      // );
       const response = await fetch(
-        `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric`
+        `${API_URL}?city=${encodeURIComponent(city)}`
       );
+
       if (!response.ok)
         throw new Error(`HTTP error! status: ${response.status}`);
       const data = await response.json();
@@ -71,9 +80,13 @@ function App() {
       setCurrentCity(city);
 
       // Also fetch forecast for searched city
+      // const forecastResponse = await fetch(
+      //   `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${API_KEY}&units=metric`
+      // );
       const forecastResponse = await fetch(
-        `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${API_KEY}&units=metric`
+        `${API_URL}/forecast?city=${encodeURIComponent(city)}`
       );
+      if (!forecastResponse.ok) throw new Error("Forecast fetch failed");
       const forecastJSON = await forecastResponse.json();
       const daily = extractDailyForecast(forecastJSON);
       setForecastData(daily);
